@@ -2,12 +2,11 @@
   "Provides functions for parsing HL7 messages"
   (:require
    [clojure.edn :as edn]
-   [clojure.string :as str]))
-
-(def datatypes-map (edn/read-string (slurp "src/hl7v2_parser/datasets/datatypes.clj")))
-(def segments-map (edn/read-string (slurp "src/hl7v2_parser/datasets/segments.clj")))
-(def fields-map (edn/read-string (slurp "src/hl7v2_parser/datasets/fields.clj")))
-(def simple-datatypes (edn/read-string (slurp "src/hl7v2_parser/datasets/simple-datatypes.clj")))
+   [clojure.string :as str]
+   [hl7v2-parser.datasets.datatypes :refer [datatypes]]
+   [hl7v2-parser.datasets.segments :refer [segments]]
+   [hl7v2-parser.datasets.fields :refer [fields]]
+   [hl7v2-parser.datasets.simple-datatypes :refer [simple-datatypes]]))
 
 (defn- escape-character->character
   [in {:keys [field-delimeter
@@ -55,7 +54,7 @@
                      (re-pattern (java.util.regex.Pattern/quote delimeter))))
          :let [[k v] component
                datatype-component-name (str datatype "." (inc k))
-               datatype-data (get datatypes-map datatype-component-name false)]
+               datatype-data (get datatypes datatype-component-name false)]
          :when (and
                 (not= "" v)
                 (or datatype-data
@@ -68,12 +67,12 @@
 
 (defn- parse-segment [segment {:keys [repetition-delimeter] :as delimeters}]
   (let [segment-name (first segment)
-        segment-data (get segments-map segment-name {})
+        segment-data (get segments segment-name {})
         repetition-delimeter-pattern (re-pattern (java.util.regex.Pattern/quote repetition-delimeter))]
     (for [field (map vector (range 1 (count segment)) (rest segment))
           :let [[k v] field
                 field-name (str segment-name "." k)
-                field-data (get fields-map field-name false)
+                field-data (get fields field-name false)
                 field-repeatable? (not= "1" (get-in segment-data [field-name :maxOccurs] "1"))
                 field-empty? (or (= "" v) (= false field-data))
                 field-type (get field-data :Type)
@@ -95,6 +94,6 @@
       (for [segment-s (str/split s-fixed #"[\n\r]")
             :let [segment (str/split (str/trim segment-s) field-delimeter-pattern)]]
         {:name (first segment)
-         :value (parse-segment delimeters)}))
+         :value (parse-segment segment delimeters)}))
     (catch Exception e
       (str "caught exception: " (.getMessage e)))))

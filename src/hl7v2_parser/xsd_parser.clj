@@ -44,5 +44,12 @@
 (defn generate-datasets [output-path]
   (doseq [name ["fields" "segments" "datatypes"
                 "simple-datatypes"]]
-    (clojure.pprint/pprint (var-get (resolve (symbol name)))
-                           (clojure.java.io/writer (str output-path name ".clj")))))
+    (with-open [w (clojure.java.io/writer
+                   (str output-path (str/replace name "-" "_") ".clj")
+                   :append true)]
+      (.write w (str "(ns hl7v2-parser.datasets." name ")"))
+      (.newLine w)
+      (.newLine w)
+      (.write w (str "(def " name " "))
+      (clojure.pprint/pprint (var-get (resolve (symbol name))) w)
+      (.write w ")"))))

@@ -1,4 +1,6 @@
-{"XCN.8" {:Type "CWE", :LongName "Source Table"},
+(ns hl7v2-parser.datasets.datatypes)
+
+(def datatypes {"XCN.8" {:Type "CWE", :LongName "Source Table"},
  "NDL.1" {:Type "CNN", :LongName "Name"},
  "XCN.25"
  {:Type "ID",
@@ -1472,3 +1474,4 @@
   :confLength "6",
   :truncation "="},
  "FC.2" {:Type "DTM", :LongName "Effective Date"}}
+)

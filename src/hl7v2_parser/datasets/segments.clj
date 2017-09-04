@@ -1,4 +1,6 @@
-{"FAC"
+(ns hl7v2-parser.datasets.segments)
+
+(def segments {"FAC"
  {"FAC.11" {:minOccurs "0", :maxOccurs "unbounded"},
   "FAC.5" {:minOccurs "0", :maxOccurs "unbounded"},
   "FAC.12" {:minOccurs "0", :maxOccurs "1"},
@@ -3008,3 +3010,4 @@
   "SID.2" {:minOccurs "0", :maxOccurs "1"},
   "SID.3" {:minOccurs "0", :maxOccurs "1"},
   "SID.4" {:minOccurs "0", :maxOccurs "1"}}}
+)

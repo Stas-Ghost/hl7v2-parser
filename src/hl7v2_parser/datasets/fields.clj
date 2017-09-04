@@ -1,4 +1,6 @@
-{"CM0.1"
+(ns hl7v2-parser.datasets.fields)
+
+(def fields {"CM0.1"
  {:Item "1010",
   :Type "SI",
   :LongName "Set ID - CM0",
@@ -10103,3 +10105,4 @@
   :Type "CWE",
   :Table "HL70403",
   :LongName "Language Ability Code"}}
+)
