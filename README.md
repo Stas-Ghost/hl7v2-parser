@@ -5,6 +5,12 @@
 
 ## Usage 
 
+```clojure
+(require '[hl7v2-parser.core :as parser])
+(parser/parse-message 
+(slurp "http://pathology.healthbase.info/viewer/samples/Syndromic%20Surveillance%20(US)/PHLIP%20influenza%20R1.0.2.hl7"))
+
+```
 
 ## License
 
