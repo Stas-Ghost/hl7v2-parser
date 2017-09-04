@@ -1,36 +1,14 @@
 # hl7v2-parser
 
-FIXME: description
+[![Clojars Project](https://img.shields.io/clojars/v/hl7v2-parser.svg)](https://clojars.org/hl7v2-parser)
+[![CircleCI](https://circleci.com/gh/Stas-Ghost/hl7v2-parser.svg?style=svg)](https://circleci.com/gh/Stas-Ghost/hl7v2-parser)
 
-## Installation
+## Usage 
 
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar hl7v2-parser-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 Stanislav Yakushev
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
