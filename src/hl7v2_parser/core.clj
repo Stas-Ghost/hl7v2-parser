@@ -1,4 +1,5 @@
 (ns hl7v2-parser.core
+  "Provides functions for parsing HL7 messages"
   (:require
    [clojure.edn :as edn]
    [clojure.string :as str]))

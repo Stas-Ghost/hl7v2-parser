@@ -1,4 +1,5 @@
 (ns hl7v2-parser.xsd-parser
+  "Utilites for parsing XML schemas of HL7 messages"
   (:require
    [clojure.data.xml :as xml]
    [clojure.string :as str]))
