@@ -1,8 +1,7 @@
 (ns hl7v2-parser.core
   (:require
    [clojure.edn :as edn]
-   [clojure.string :as str])
-  (:gen-class))
+   [clojure.string :as str]))
 
 (def datatypes-map (edn/read-string (slurp "src/hl7v2_parser/datasets/datatypes.clj")))
 (def segments-map (edn/read-string (slurp "src/hl7v2_parser/datasets/segments.clj")))

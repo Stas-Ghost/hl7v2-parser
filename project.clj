@@ -5,6 +5,4 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/data.xml "0.2.0-alpha2"]]
-  :main ^:skip-aot hl7v2-parser.core
-  :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :target-path "target/%s")
