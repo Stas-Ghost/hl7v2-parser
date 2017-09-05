@@ -12,19 +12,24 @@
   [in {:keys [field-delimeter
               component-delimeter
               repetition-delimeter
-              escape-characer
+              escape-character
               subcomponent-delimeter]}]
-  (str/replace in #"\\\w+?\\"
+  (str/replace in
+               (re-pattern
+                (str
+                 (java.util.regex.Pattern/quote escape-character)
+                 "\\w{1}"
+                 (java.util.regex.Pattern/quote escape-character)))
                #(condp = %
-                  (str escape-characer "F" escape-characer) field-delimeter
-                  (str escape-characer "R" escape-characer) repetition-delimeter
-                  (str escape-characer "S" escape-characer) component-delimeter
-                  (str escape-characer "T" escape-characer) subcomponent-delimeter
-                  (str escape-characer "E" escape-characer) escape-characer
-                  (str escape-characer "P" escape-characer) "*"
-                  (str escape-characer "H" escape-characer) "" ;; start highlighting
-                  (str escape-characer "N" escape-characer) "" ;; stop highlighting
-                  )))
+                  (str escape-character "F" escape-character) field-delimeter
+                  (str escape-character "R" escape-character) repetition-delimeter
+                  (str escape-character "S" escape-character) component-delimeter
+                  (str escape-character "T" escape-character) subcomponent-delimeter
+                  (str escape-character "E" escape-character) escape-character
+                  (str escape-character "P" escape-character) "*"
+                  (str escape-character "H" escape-character) "" ;; start highlighting
+                  (str escape-character "N" escape-character) "" ;; stop highlighting
+                  %)))
 
 (defn- get-delimeters [s]
   (if (str/starts-with? s "MSH")
@@ -74,7 +79,7 @@
                 field-name (str segment-name "." k)
                 field-data (get fields field-name false)
                 field-repeatable? (not= "1" (get-in segment-data [field-name :maxOccurs] "1"))
-                field-empty? (or (= "" v) (= false field-data))
+                field-empty? (or (= "" v) (false? field-data))
                 field-type (get field-data :Type)
                 value (cond
                         field-empty? ""
