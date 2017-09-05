@@ -1,6 +1,8 @@
 (ns hl7v2-parser.core-test
-  (:require [clojure.test :refer :all]
-            [hl7v2-parser.core :as core :refer :all]))
+  (:require
+   [clojure.string :as str]
+   [clojure.test :refer :all]
+   [hl7v2-parser.core :as core :refer :all]))
 
 (def default-delimeters
   {:field-delimeter "|"
@@ -73,3 +75,36 @@
              {:name "varies",
               :value
               "VA STARLIMS Stage&2.16.840.1.114222.4.3.3.2.2.1&ISO"})))))
+
+(deftest parse-segment-test
+  (testing "Parsing fields"
+    (is (= (#'core/parse-segment ["PID"] default-delimeters) '())
+        "Segment name should be absent")
+    (is (= (map :name (#'core/parse-segment ["PID" "a" "b" "c"] default-delimeters)) '("PID.1" "PID.2" "PID.3"))
+        "Fields ids should begin from 1")
+    (is (= (map :name (#'core/parse-segment ["PID" "" "" "c"] default-delimeters)) '("PID.1" "PID.2" "PID.3"))
+        "Empty fields should be preserved")
+    (is (= (#'core/parse-segment ["NONE" "a" "" "c"] default-delimeters)
+           '({:name "NONE.1", :value "a"}
+             {:name "NONE.2", :value ""}
+             {:name "NONE.3", :value "c"}))
+        "If field is unknown or empty it's value should left unprocessed")
+    (testing "Repetition of fields"
+      (with-redefs [hl7v2-parser.datasets.segments/segments
+                    {"TEST" {"TEST.1" {:minOccurs "0", :maxOccurs "1"}
+                             "TEST.2" {:minOccurs "0", :maxOccurs "unbounded"}
+                             "TEST.3" {:minOccurs "0", :maxOccurs "2"}}}
+                    hl7v2-parser.datasets.fields/fields
+                    {"TEST.1" {:Type "ST"}
+                     "TEST.2" {:Type "ST"}
+                     "TEST.3" {:Type "ST"}}]
+        (let [r (->> (#'core/parse-segment ["TEST" "1~1"] default-delimeters) last :value)]
+          (is (= r '({:name "ST", :value "1~1"})))
+          (is (= (count r) 1) "Fields with cardinality 1 should not be splited by repetition delimeter")
+          (is (-> r first :value (str/includes? "~")) "Delimeter is unprocessed"))
+        (let [r (->> (#'core/parse-segment ["TEST" "" "2~2"] default-delimeters) last :value)]
+          (is (= r '[({:name "ST", :value "2"}) ({:name "ST", :value "2"})]))
+          (is (= (count r) 2) "Fields with unbounded cardinality should be splited by repetition delimeter"))
+        (let [r (->> (#'core/parse-segment ["TEST" "" "" "3~3"] default-delimeters) last :value)]
+          (is (= r '[({:name "ST", :value "3"}) ({:name "ST", :value "3"})]))
+          (is (= (count r) 2) "Fields with cardinality bigger than 1 should be splited by repetition delimeter"))))))

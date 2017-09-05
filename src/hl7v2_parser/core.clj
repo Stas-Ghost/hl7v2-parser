@@ -75,7 +75,7 @@
                 field-empty? (or (= "" v) (false? field-data))
                 field-type (get field-data :Type)
                 value (cond
-                        field-empty? ""
+                        field-empty? v
                         field-repeatable? (mapv (partial composite->simple field-type delimeters)
                                                 (split-by-delimeter v repetition-delimeter))
                         :else (composite->simple field-type delimeters v))]]
