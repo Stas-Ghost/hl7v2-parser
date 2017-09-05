@@ -44,9 +44,6 @@
      :escape-character "\\"
      :subcomponent-delimeter "&"}))
 
-(defn- unpack-seq [xs]
-  (let [fv (first xs)]
-    (if (string? fv) fv xs)))
 
 (defn- composite->simple
   ([datatype {:keys [component-delimeter] :as delimeters} value]
@@ -54,21 +51,19 @@
   ([datatype {:keys [subcomponent-delimeter] :as delimeters} value delimeter]
    (for [component (map-indexed
                     vector
-                    (str/split
-                     value
-                     (re-pattern (java.util.regex.Pattern/quote delimeter))))
+                    (str/split value (re-pattern (java.util.regex.Pattern/quote delimeter))))
          :let [[k v] component
                datatype-component-name (str datatype "." (inc k))
                datatype-data (get datatypes datatype-component-name false)]
          :when (and
-                (not= "" v)
                 (or datatype-data
-                    (simple-datatypes datatype)
-                    (= "varies" datatype)))]
+                    (= "varies" datatype)
+                    (simple-datatypes datatype)))]
      (if datatype-data
-       {:name (:Type datatype-data)
-        :value (unpack-seq (composite->simple (:Type datatype-data) delimeters v subcomponent-delimeter))}
-       (escape-character->character v delimeters)))))
+       {:name datatype-component-name
+        :value (composite->simple (:Type datatype-data) delimeters v subcomponent-delimeter)}
+       {:name datatype
+        :value(escape-character->character v delimeters)}))))
 
 (defn- parse-segment [segment {:keys [repetition-delimeter] :as delimeters}]
   (let [segment-name (first segment)
