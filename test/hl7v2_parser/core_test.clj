@@ -108,3 +108,16 @@
         (let [r (->> (#'core/parse-segment ["TEST" "" "" "3~3"] default-delimeters) last :value)]
           (is (= r '[({:name "ST", :value "3"}) ({:name "ST", :value "3"})]))
           (is (= (count r) 2) "Fields with cardinality bigger than 1 should be splited by repetition delimeter"))))))
+
+(deftest parse-message-test
+  (testing "Basic parsing properties"
+    (is (= (#'core/parse-message "MSH|^~\\&")
+           '({:name "MSH",
+              :value
+              ({:name "MSH.1", :value ""}
+               {:name "MSH.2",
+                :value ({:name "ST", :value ""} {:name "ST", :value "~\\&"})})}))
+        "MSH.1 should be empty. MSH.2 should contain delimeters")
+    (is (= (#'core/parse-message "") '()) "Parsing of empty string should return empty list")
+    (with-redefs [core/get-delimeters (fn [& all] (throw (Exception. "shots are fired")))]
+      (is (= (#'core/parse-message "") "caught exception: shots are fired") "Exceptions should be caught"))))

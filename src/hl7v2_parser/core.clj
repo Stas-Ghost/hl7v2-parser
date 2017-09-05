@@ -89,8 +89,10 @@
           ;; fix for MSH.1 field - field separator
           s-fixed (str/replace s (str "MSH" field-delimeter) (str "MSH" field-delimeter field-delimeter))]
       (for [segment-s (str/split s-fixed #"[\n\r]")
-            :let [segment (split-by-delimeter segment-s field-delimeter)]]
-        {:name (first segment)
+            :let [segment (split-by-delimeter segment-s field-delimeter)
+                  segment-name (first segment)]
+            :when (not= "" segment-name)]
+        {:name segment-name
          :value (parse-segment segment delimeters)}))
     (catch Exception e
       (str "caught exception: " (.getMessage e)))))
