@@ -44,31 +44,29 @@
      :escape-character "\\"
      :subcomponent-delimeter "&"}))
 
+(defn- split-by-delimeter [s d]
+  (str/split s (re-pattern (java.util.regex.Pattern/quote d))))
 
 (defn- composite->simple
   ([datatype {:keys [component-delimeter] :as delimeters} value]
    (composite->simple datatype delimeters value component-delimeter))
   ([datatype {:keys [subcomponent-delimeter] :as delimeters} value delimeter]
-   (for [component (map-indexed
-                    vector
-                    (str/split value (re-pattern (java.util.regex.Pattern/quote delimeter))))
+   (for [component (map-indexed vector (split-by-delimeter value delimeter))
          :let [[k v] component
                datatype-component-name (str datatype "." (inc k))
                datatype-data (get datatypes datatype-component-name false)]
-         :when (and
-                (or datatype-data
-                    (= "varies" datatype)
-                    (simple-datatypes datatype)))]
+         :when (or datatype-data
+                   (= "varies" datatype)
+                   (simple-datatypes datatype))]
      (if datatype-data
        {:name datatype-component-name
         :value (composite->simple (:Type datatype-data) delimeters v subcomponent-delimeter)}
        {:name datatype
-        :value(escape-character->character v delimeters)}))))
+        :value (escape-character->character v delimeters)}))))
 
 (defn- parse-segment [segment {:keys [repetition-delimeter] :as delimeters}]
   (let [segment-name (first segment)
-        segment-data (get segments segment-name {})
-        repetition-delimeter-pattern (re-pattern (java.util.regex.Pattern/quote repetition-delimeter))]
+        segment-data (get segments segment-name {})]
     (for [field (map vector (range 1 (count segment)) (rest segment))
           :let [[k v] field
                 field-name (str segment-name "." k)
@@ -79,7 +77,7 @@
                 value (cond
                         field-empty? ""
                         field-repeatable? (mapv (partial composite->simple field-type delimeters)
-                                                (str/split v repetition-delimeter-pattern))
+                                                (split-by-delimeter v repetition-delimeter))
                         :else (composite->simple field-type delimeters v))]]
       {:name field-name
        :value value})))
@@ -89,10 +87,9 @@
     (let [delimeters (get-delimeters s)
           {:keys [field-delimeter]} delimeters
           ;; fix for MSH.1 field - field separator
-          s-fixed (str/replace s (str "MSH" field-delimeter) (str "MSH" field-delimeter field-delimeter))
-          field-delimeter-pattern (re-pattern (java.util.regex.Pattern/quote field-delimeter))]
+          s-fixed (str/replace s (str "MSH" field-delimeter) (str "MSH" field-delimeter field-delimeter))]
       (for [segment-s (str/split s-fixed #"[\n\r]")
-            :let [segment (str/split (str/trim segment-s) field-delimeter-pattern)]]
+            :let [segment (split-by-delimeter segment-s field-delimeter)]]
         {:name (first segment)
          :value (parse-segment segment delimeters)}))
     (catch Exception e
