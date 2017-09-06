@@ -6,7 +6,8 @@
    [hl7v2-parser.datasets.datatypes :refer [datatypes]]
    [hl7v2-parser.datasets.segments :refer [segments]]
    [hl7v2-parser.datasets.fields :refer [fields]]
-   [hl7v2-parser.datasets.simple-datatypes :refer [simple-datatypes]]))
+   [hl7v2-parser.datasets.simple-datatypes :refer [simple-datatypes]])
+  (:import [java.util.regex Pattern]))
 
 (defn- escape-character->character
   [in {:keys [field-delimeter
@@ -14,22 +15,20 @@
               repetition-delimeter
               escape-character
               subcomponent-delimeter]}]
-  (str/replace in
-               (re-pattern
-                (str
-                 (java.util.regex.Pattern/quote escape-character)
-                 "\\w{1}"
-                 (java.util.regex.Pattern/quote escape-character)))
-               #(condp = %
-                  (str escape-character "F" escape-character) field-delimeter
-                  (str escape-character "R" escape-character) repetition-delimeter
-                  (str escape-character "S" escape-character) component-delimeter
-                  (str escape-character "T" escape-character) subcomponent-delimeter
-                  (str escape-character "E" escape-character) escape-character
-                  (str escape-character "P" escape-character) "*"
-                  (str escape-character "H" escape-character) "" ;; start highlighting
-                  (str escape-character "N" escape-character) "" ;; stop highlighting
-                  %)))
+  (str/replace
+   in
+   (re-pattern
+    (str (Pattern/quote escape-character) "\\w{1}" (Pattern/quote escape-character)))
+   #(condp = %
+      (str escape-character "F" escape-character) field-delimeter
+      (str escape-character "R" escape-character) repetition-delimeter
+      (str escape-character "S" escape-character) component-delimeter
+      (str escape-character "T" escape-character) subcomponent-delimeter
+      (str escape-character "E" escape-character) escape-character
+      (str escape-character "P" escape-character) "*"
+      (str escape-character "H" escape-character) "" ;; start highlighting
+      (str escape-character "N" escape-character) "" ;; stop highlighting
+      %)))
 
 (defn- get-delimeters [s]
   (if (str/starts-with? s "MSH")
@@ -45,7 +44,7 @@
      :subcomponent-delimeter "&"}))
 
 (defn- split-by-delimeter [s d]
-  (str/split s (re-pattern (java.util.regex.Pattern/quote d))))
+  (str/split s (re-pattern (Pattern/quote d))))
 
 (defn- composite->simple
   ([datatype {:keys [component-delimeter] :as delimeters} value]

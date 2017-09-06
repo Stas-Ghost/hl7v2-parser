@@ -34,7 +34,7 @@
     (is (= (#'core/composite->simple "ST" default-delimeters "123") '({:name "ST" :value "123"})))
     (is (= (#'core/composite->simple "ST" default-delimeters "\\F\\") '({:name "ST" :value "|"}))
         "For simplee datatypes escape characters conversion should be done")
-    (is (= (#'core/composite->simple "NONE" default-delimeters "123") '())))
+    (is (= (#'core/composite->simple "NONE" default-delimeters "123") ())))
   (testing "Complex datatypes handling"
     (is (= (count (#'core/composite->simple "CX" default-delimeters "^^^a")) 4)
         "Empty components should be parsed")
@@ -78,7 +78,7 @@
 
 (deftest parse-segment-test
   (testing "Parsing fields"
-    (is (= (#'core/parse-segment ["PID"] default-delimeters) '())
+    (is (= (#'core/parse-segment ["PID"] default-delimeters) ())
         "Segment name should be absent")
     (is (= (map :name (#'core/parse-segment ["PID" "a" "b" "c"] default-delimeters)) '("PID.1" "PID.2" "PID.3"))
         "Fields ids should begin from 1")
@@ -118,6 +118,6 @@
                {:name "MSH.2",
                 :value ({:name "ST", :value ""} {:name "ST", :value "~\\&"})})}))
         "MSH.1 should be empty. MSH.2 should contain delimeters")
-    (is (= (#'core/parse-message "") '()) "Parsing of empty string should return empty list")
+    (is (= (#'core/parse-message "") ()) "Parsing of empty string should return empty list")
     (with-redefs [core/get-delimeters (fn [& all] (throw (Exception. "shots are fired")))]
       (is (= (#'core/parse-message "") "caught exception: shots are fired") "Exceptions should be caught"))))
